@@ -1,0 +1,58 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Text to Database</title>
+</head>
+<body>
+    <h1>Save Text to Database</h1>
+    <form action="/" method="POST">
+        <label for="text">Enter Text:</label><br>
+        <textarea id="text" name="text" rows="4" cols="50"></textarea><br><br>
+        <input type="submit" value="Save">
+    </form>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Text to Database</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style>
+        /* Custom styles */
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+            padding-top: 4rem;
+        }
+        .container {
+            max-width: 600px; /* Limit content width */
+            padding: 0 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Save Text to Database</h1>
+                <form action="/" method="POST">
+                    <div class="form-group">
+                        <label for="text">Enter Text:</label>
+                        <textarea id="text" name="text" class="form-control" rows="4" cols="50"></textarea>
+                    </div>
+                    <div class="form-group text-right">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional: Bootstrap JS (for certain Bootstrap components like dropdowns) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-3/ziFjmF8n2N6pc9OpJ8zB1rGsSb1J25wwKofL6MI1Pq81YTD1hFVakE1LwYCW+q" crossorigin="anonymous"></script>
+</body>
+</html>

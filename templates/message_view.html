@@ -1,0 +1,60 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieve Text from Database</title>
+</head>
+<body>
+    <h1>Retrieved Text</h1>
+    <div>
+        <p>{{ text }}</p>
+    </div>
+    <a href="/">Go back to save more text</a>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieve Text from Database</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style>
+        /* Custom styles */
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+            padding-top: 4rem;
+        }
+        .container {
+            max-width: 600px; /* Limit content width */
+            padding: 0 15px;
+        }
+        .card {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        .card-body {
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Retrieved Text</h1>
+                <div>
+                    <p>{{ text }}</p>
+                </div>
+                <a href="/" class="btn btn-primary">Go back to save more text</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Optional for certain Bootstrap components like dropdowns) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-3/ziFjmF8n2N6pc9OpJ8zB1rGsSb1J25wwKofL6MI1Pq81YTD1hFVakE1LwYCW+q" crossorigin="anonymous"></script>
+</body>
+</html>
