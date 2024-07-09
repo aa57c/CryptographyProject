@@ -9,3 +9,6 @@ Django>=3.0,<4.0
 dj_database_url
 psycopg2-binary
 psycopg2
+cryptography
+pycryptodome
+pqcrypto
