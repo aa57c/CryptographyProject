@@ -44,7 +44,7 @@ def save_string_to_postgres(input_string):
             """)
             print("Table 'my_strings' created successfully!")
 
-        # Insert or update the string into the table
+        # Insert the string into the table
         cur.execute("INSERT INTO my_strings (content) VALUES (%s)", (input_string,))
         
         # Commit the transaction
