@@ -10,6 +10,15 @@ from flask import Flask, render_template, request, redirect, url_for
 import os
 import psycopg2
 from postgres_interaction import save_string_to_postgres, retrieve_string_from_postgres
+from Crypto.Cipher import AES
+from ecdsa import SigningKey, SECP256k1
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Random import get_random_bytes
+from pqcrypto.sign import sphincs_haraka_128f_robust
+import base64
+
+
+
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -20,6 +29,54 @@ app = Flask(__name__)
 # password = "password"
 # host = "db"
 # port = "5432"
+
+
+# This commented out code does not work in docker when i try to run it.
+
+# AES encryption/decryption
+def aes_encrypt(key, data):
+    cipher = AES.new(key, AES.MODE_EAX)
+    nonce = cipher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(data.encode('utf-8'))
+    return base64.b64encode(nonce + ciphertext).decode('utf-8')
+
+def aes_decrypt(key, data):
+    raw_data = base64.b64decode(data)
+    nonce = raw_data[:16]
+    ciphertext = raw_data[16:]
+    cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+    plaintext = cipher.decrypt(ciphertext).decode('utf-8')
+    return plaintext
+
+# ECC encryption/decryption
+def ecc_sign(data):
+    sk = SigningKey.generate(curve=SECP256k1)
+    vk = sk.verifying_key
+    signature = sk.sign(data.encode('utf-8'))
+    return vk.to_pem().decode('utf-8'), base64.b64encode(signature).decode('utf-8')
+
+def ecc_verify(public_key, signature, data):
+    vk = SigningKey.from_pem(public_key).verifying_key
+    return vk.verify(base64.b64decode(signature), data.encode('utf-8'))
+
+# Post-Quantum cryptography using SPHINCS+
+
+def pq_sign(data):
+    sk = sphincs_haraka_128f_robust.generate_keypair()
+    signature = sphincs_haraka_128f_robust.sign(sk, data.encode('utf-8'))
+    pk = sk.get_public_key()
+    return base64.b64encode(pk).decode('utf-8'), base64.b64encode(signature).decode('utf-8')
+
+
+def pq_verify(public_key, signature, data):
+    pk = base64.b64decode(public_key)
+    sig = base64.b64decode(signature)
+    return sphincs_haraka_128f_robust.verify(pk, data.encode('utf-8'), sig)
+
+
+
+
+
 
 # Route to save text to the database
 @app.route('/', methods=['GET', 'POST'])
