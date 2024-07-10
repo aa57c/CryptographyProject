@@ -11,8 +11,8 @@ import os
 from postgres_interaction import save_string_to_postgres, retrieve_string_from_postgres
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-# from ecdsa import SigningKey, VerifyingKey, NIST384p
-from pqcrypto.kem import kyber512
+from ecdsa import SigningKey, VerifyingKey, NIST384p
+import pqcryptography as pqc
 import base64
 import json
 
@@ -26,6 +26,7 @@ app = Flask(__name__)
 # host = "db"
 # port = "5432"
 
+'''
 # AES Encryption
 
 def aes_encrypt(data, key):
@@ -40,19 +41,21 @@ def aes_decrypt(encrypted_data, key):
     cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
     return cipher.decrypt_and_verify(ciphertext, tag).decode('utf-8')
 
-# PQC Key Encryption
-def pqc_encrypt_key(aes_key):
-    pk, sk = kyber512.generate_keypair()
-    encrypted_key = kyber512.encrypt(pk, aes_key)
-    return base64.b64encode(encrypted_key).decode('utf-8'), sk
+# PQC Key Encapsulation (Encryption)
+def pqc_encapsulate(aes_key):
+    kem = liboqs.KeyEncapsulation('Kyber512')
+    public_key = kem.generate_keypair()
+    ciphertext, shared_secret = kem.encap_secret(public_key)
+    return base64.b64encode(ciphertext).decode('utf-8'), base64.b64encode(public_key).decode('utf-8'), base64.b64encode(kem.export_secret_key()).decode('utf-8')
 
-# PQC Key Decryption
-def pqc_decrypt_key(encrypted_key, sk):
-    encrypted_key = base64.b64decode(encrypted_key)
-    aes_key = kyber512.decrypt(sk, encrypted_key)
-    return aes_key
+# PQC Key Decapsulation (Decryption)
+def pqc_decapsulate(ciphertext, secret_key, public_key):
+    kem = liboqs.KeyEncapsulation('Kyber512', secret_key=base64.b64decode(secret_key))
+    kem.set_public_key(base64.b64decode(public_key))
+    shared_secret = kem.decap_secret(base64.b64decode(ciphertext))
+    return shared_secret
 
-'''
+
 # ECC Key Generation
 def generate_ecc_key():
     # Generate ECC key
@@ -89,15 +92,18 @@ def pqc_decrypt(data):
 # Route to save text to the database
 @app.route('/', methods=['GET', 'POST'])
 def save_text():
+    
     if request.method == 'POST':
+        
         text = request.form['text']
 
+        '''
         # AES encryption
         aes_key = get_random_bytes(32) # AES-256
         aes_encrypted = aes_encrypt(text.encode('utf-8'), aes_key)
 
         # PQC encryption of AES key
-        pqc_encrypted_key, pqc_sk = pqc_encrypt_key(aes_key)
+        pqc_ciphertext, pqc_public_key, pqc_secret_key = pqc_encapsulate(aes_key)
 
         # ECC key generation and signing
         # sk, vk = generate_ecc_key()
@@ -107,14 +113,16 @@ def save_text():
 
         # Prepare data to be saved
         text_data = {
-            'aes_encrypted' : aes_encrypted,
-            'pqc_encrypted_key': pqc_encrypted_key,
-            'pqc_sk': base64.b64encode(pqc_sk).decode('utf-8')
+            'aes_encrypted': aes_encrypted,
+            'pqc_ciphertext': pqc_ciphertext,
+            'pqc_public_key': pqc_public_key,
+            'pqc_secret_key': pqc_secret_key,
             #'ecc_signature': ecc_signature,
             #'ecc_verifying_key': vk.to_string().hex(),
             #'pqc_encrypted': pqc_encrypted
         }
-        save_string_to_postgres(json.dumps(text_data))
+        '''
+        save_string_to_postgres(json.dumps(text))
         
         return redirect(url_for('retrieve_text'))
     return render_template('message_save.html')
@@ -122,18 +130,20 @@ def save_text():
 # Route to retrieve and display text from the database
 @app.route('/retrieve', methods=['GET'])
 def retrieve_text():
-    text_data_json = retrieve_string_from_postgres()
-    text_data = json.loads(text_data_json)
+    
+    text = retrieve_string_from_postgres()
+    '''
 
     aes_encrypted = text_data['aes_encrypted']
-    pqc_encrypted_key = text_data['pqc_encrypted_key']
-    pqc_sk = base64.b64decode(text_data['pqc_sk'])
+    pqc_ciphertext = text_data['pqc_ciphertext']
+    pqc_public_key = text_data['pqc_public_key']
+    pqc_secret_key = text_data['pqc_secret_key']
     # ecc_signature = text_data['ecc_signature']
     # ecc_verifying_key_hex = text_data['ecc_verifying_key']
     # pqc_encrypted = text_data['pqc_encrypted']
 
     # PQC decryption of AES key
-    aes_key = pqc_decrypt_key(pqc_encrypted_key, pqc_sk)
+    aes_key = pqc_decapsulate(pqc_ciphertext, pqc_secret_key, pqc_public_key)
 
     # AES decryption
     aes_decrypted = aes_decrypt(aes_encrypted, aes_key)
@@ -144,8 +154,9 @@ def retrieve_text():
     
     # PQC decryption (example)
     # pqc_decrypted = pqc_decrypt(pqc_encrypted)
+    '''
 
-    return render_template('message_view.html', text=aes_decrypted)
+    return render_template('message_view.html', text=text)
 
 # Run the Flask application
 if __name__ == '__main__':

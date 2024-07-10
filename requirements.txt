@@ -5,10 +5,9 @@ itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==2.1.5
 Werkzeug==3.0.3
-Django>=3.0,<4.0
-dj_database_url
-psycopg2-binary
-psycopg2
-cryptography
-pycryptodome
-pqcrypto
+Django==3.2.25
+dj_database_url==2.2.0
+psycopg2-binary==2.9.9
+pycryptodome==3.20.0
+pqcryptography==0.0.3
+ecdsa==0.19.0
