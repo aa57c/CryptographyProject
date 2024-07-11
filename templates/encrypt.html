@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Encrypt Text</title>
+</head>
+<body>
+    <h1>Encrypt and Save Text</h1>
+    <form method="POST">
+        <label for="text">Text to Encrypt:</label>
+        <input type="text" id="text" name="text" required>
+        <button type="submit">Encrypt and Save</button>
+    </form>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+</body>
+</html>

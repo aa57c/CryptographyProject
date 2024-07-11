@@ -90,6 +90,20 @@ def retrieve_string_from_postgres():
     except Exception as e:
         print(f"Error retrieving string from PostgreSQL: {e}")
         return None
+def retrieve_all_from_postgres():
+    conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT data FROM encrypted_data")
+    results = cur.fetchall()
+    cur.close()
+    conn.close()
+    return [result[0] for result in results]
 
 # Example usage
 if __name__ == "__main__":

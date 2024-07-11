@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+    <h1>Cryptography Demonstration</h1>
+    <ul>
+        <li><a href="{{ url_for('encrypt_text') }}">Encrypt and Save Text</a></li>
+        <li><a href="{{ url_for('decrypt_text') }}">Retrieve and Decrypt Text</a></li>
+        <li><a href="{{ url_for('verify_signature') }}">Verify ECC Signature</a></li>
+    </ul>
+</body>
+</html>
