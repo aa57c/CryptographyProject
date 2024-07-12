@@ -5,8 +5,29 @@
     <title>Decrypt Text</title>
 </head>
 <body>
-    <h1>Decrypted Text</h1>
+    <h1>Decrypt Text</h1>
+    <form method="post" action="/verify">
+        <label for="data_id">Data ID (optional):</label>
+        <input type="text" id="data_id" name="data_id">
+        <button type="submit">Verify Signature</button>
+    </form>
+    {% if verified %}
+    <form method="post" action="/decrypt">
+        <input type="hidden" name="data_id" value="{{ data_id }}">
+        <button type="submit" name="decrypt">Decrypt</button>
+    </form>
+    {% endif %}
     <p>{{ text }}</p>
     <a href="{{ url_for('home') }}">Back to Home</a>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 </body>
 </html>
+

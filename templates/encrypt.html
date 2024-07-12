@@ -1,16 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Encrypt Text</title>
+    <title>Encrypt Data</title>
 </head>
 <body>
-    <h1>Encrypt and Save Text</h1>
-    <form method="POST">
-        <label for="text">Text to Encrypt:</label>
+    <h1>Encrypt Data</h1>
+    <form method="post" action="/encrypt">
+        <label for="text">Text:</label>
         <input type="text" id="text" name="text" required>
-        <button type="submit">Encrypt and Save</button>
+        <button type="submit">Encrypt</button>
     </form>
-    <a href="{{ url_for('home') }}">Back to Home</a>
+    <a href="/">Go to Home</a>
 </body>
 </html>
+

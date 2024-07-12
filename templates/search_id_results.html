@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results for ID "{{ search_id }}"</h1>
+    {% if result %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>AES Encrypted Data</th>
+                    <th>PQC Encrypted Key</th>
+                    <th>ECC Signature</th>
+                    <th>ECC Verifying Key</th>
+                    <th>PQC Private Key</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ result[0] }}</td>
+                    <td>{{ result[1] }}</td>
+                    <td>{{ result[2] }}</td>
+                    <td>{{ result[3] }}</td>
+                    <td>{{ result[4] }}</td>
+                    <td>{{ result[5] }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% else %}
+        <p>No data found for ID "{{ search_id }}"</p>
+    {% endif %}
+    <a href="{{ url_for('search_by_id') }}">Back to Search</a>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+</body>
+</html>

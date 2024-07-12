@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search by ID</title>
+</head>
+<body>
+    <h1>Search by ID</h1>
+    <form method="POST">
+        <label for="search_id">ID:</label>
+        <input type="number" id="search_id" name="search_id" required>
+        <button type="submit">Search</button>
+    </form>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+</body>
+</html>

@@ -10,14 +10,22 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Data</th>
+                <th>AES Encrypted Data</th>
+                <th>PQC Encrypted Key</th>
+                <th>ECC Signature</th>
+                <th>ECC Verifying Key</th>
+                <th>PQC Private Key</th>
             </tr>
         </thead>
         <tbody>
             {% for item in data %}
                 <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ item }}</td>
+                    <td>{{ item[0] }}</td>
+                    <td>{{ item[1] }}</td>
+                    <td>{{ item[2] }}</td>
+                    <td>{{ item[3] }}</td>
+                    <td>{{ item[4] }}</td>
+                    <td>{{ item[5] }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -25,3 +33,4 @@
     <a href="{{ url_for('home') }}">Back to Home</a>
 </body>
 </html>
+
