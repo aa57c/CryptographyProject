@@ -3,31 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <title>Decrypt Text</title>
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Decrypt Text</h1>
-    <form method="post" action="/verify">
-        <label for="data_id">Data ID (optional):</label>
-        <input type="text" id="data_id" name="data_id">
-        <button type="submit">Verify Signature</button>
-    </form>
-    {% if verified %}
-    <form method="post" action="/decrypt">
-        <input type="hidden" name="data_id" value="{{ data_id }}">
-        <button type="submit" name="decrypt">Decrypt</button>
-    </form>
-    {% endif %}
-    <p>{{ text }}</p>
-    <a href="{{ url_for('home') }}">Back to Home</a>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo">Cryptography Project</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('encrypt_text') }}">Encrypt Text</a></li>
+                <li><a href="{{ url_for('decrypt_text') }}">Decrypt Text</a></li>
+                <li><a href="{{ url_for('view_database') }}">View Database</a></li>
+                <li><a href="{{ url_for('search_by_id') }}">Search by ID</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Decrypt Text</h1>
+        <form method="post" action="/verify">
+            <div class="input-field">
+                <label for="data_id">Data ID (optional):</label>
+                <input type="text" id="data_id" name="data_id">
+            </div>
+            <button class="btn" type="submit">Verify Signature</button>
+        </form>
+
+        {% if verified %}
+        <form method="post" action="/decrypt">
+            <input type="hidden" name="data_id" value="{{ data_id }}">
+            <button class="btn" type="submit" name="decrypt">Decrypt</button>
+        </form>
+        {% endif %}
+        
+        <p>{{ text }}</p>
+        
+        <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
+        
+        <!-- Display flashed messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="card-panel teal lighten-2">
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.AutoInit();
+        });
+    </script>
 </body>
 </html>
+
 

@@ -3,34 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>Database Contents</title>
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Database Contents</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>AES Encrypted Data</th>
-                <th>PQC Encrypted Key</th>
-                <th>ECC Signature</th>
-                <th>ECC Verifying Key</th>
-                <th>PQC Private Key</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in data %}
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo">Cryptography Project</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('encrypt_text') }}">Encrypt Text</a></li>
+                <li><a href="{{ url_for('decrypt_text') }}">Decrypt Text</a></li>
+                <li><a href="{{ url_for('view_database') }}">View Database</a></li>
+                <li><a href="{{ url_for('search_by_id') }}">Search by ID</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Database Contents</h1>
+        <table class="highlight responsive-table">
+            <thead>
                 <tr>
-                    <td>{{ item[0] }}</td>
-                    <td>{{ item[1] }}</td>
-                    <td>{{ item[2] }}</td>
-                    <td>{{ item[3] }}</td>
-                    <td>{{ item[4] }}</td>
-                    <td>{{ item[5] }}</td>
+                    <th>ID</th>
+                    <th>AES Encrypted Data</th>
+                    <th>PQC Encrypted Key</th>
+                    <th>ECC Signature</th>
+                    <th>ECC Verifying Key</th>
+                    <th>PQC Private Key</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="{{ url_for('home') }}">Back to Home</a>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                    <tr>
+                        <td>{{ item[0] }}</td>
+                        <td>{{ item[1] }}</td>
+                        <td>{{ item[2] }}</td>
+                        <td>{{ item[3] }}</td>
+                        <td>{{ item[4] }}</td>
+                        <td>{{ item[5] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
+    </div>
+
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.AutoInit();
+        });
+    </script>
 </body>
 </html>
 

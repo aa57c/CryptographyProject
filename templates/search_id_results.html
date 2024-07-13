@@ -3,36 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <title>Search Results</title>
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Search Results for ID "{{ search_id }}"</h1>
-    {% if result %}
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>AES Encrypted Data</th>
-                    <th>PQC Encrypted Key</th>
-                    <th>ECC Signature</th>
-                    <th>ECC Verifying Key</th>
-                    <th>PQC Private Key</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{ result[0] }}</td>
-                    <td>{{ result[1] }}</td>
-                    <td>{{ result[2] }}</td>
-                    <td>{{ result[3] }}</td>
-                    <td>{{ result[4] }}</td>
-                    <td>{{ result[5] }}</td>
-                </tr>
-            </tbody>
-        </table>
-    {% else %}
-        <p>No data found for ID "{{ search_id }}"</p>
-    {% endif %}
-    <a href="{{ url_for('search_by_id') }}">Back to Search</a>
-    <a href="{{ url_for('home') }}">Back to Home</a>
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo">Cryptography Project</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('encrypt_text') }}">Encrypt Text</a></li>
+                <li><a href="{{ url_for('decrypt_text') }}">Decrypt Text</a></li>
+                <li><a href="{{ url_for('view_database') }}">View Database</a></li>
+                <li><a href="{{ url_for('search_by_id') }}">Search by ID</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Search Results for ID "{{ search_id }}"</h1>
+        {% if result %}
+            <table class="highlight responsive-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>AES Encrypted Data</th>
+                        <th>PQC Encrypted Key</th>
+                        <th>ECC Signature</th>
+                        <th>ECC Verifying Key</th>
+                        <th>PQC Private Key</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ result[0] }}</td>
+                        <td>{{ result[1] }}</td>
+                        <td>{{ result[2] }}</td>
+                        <td>{{ result[3] }}</td>
+                        <td>{{ result[4] }}</td>
+                        <td>{{ result[5] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        {% else %}
+            <p>No data found for ID "{{ search_id }}"</p>
+        {% endif %}
+        <a href="{{ url_for('search_by_id') }}" class="btn">Back to Search</a>
+        <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
+    </div>
+
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.AutoInit();
+        });
+    </script>
 </body>
 </html>

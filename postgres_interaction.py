@@ -152,3 +152,20 @@ def search_by_id_in_postgres(search_id):
     except Exception as e:
         print(f"Error searching by ID in PostgreSQL: {e}")
         return None
+# Function to delete all entries from PostgreSQL
+def delete_all_entries_from_postgres():
+    try:
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
+        cur = conn.cursor()
+        cur.execute("DELETE FROM encrypted_data")
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error deleting all entries from PostgreSQL: {e}")

@@ -7,7 +7,7 @@
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 import os
-from postgres_interaction import save_data_to_postgres, retrieve_latest_entry_from_postgres, search_by_id_in_postgres, retrieve_all_entries_from_postgres
+from postgres_interaction import delete_all_entries_from_postgres, save_data_to_postgres, retrieve_latest_entry_from_postgres, search_by_id_in_postgres, retrieve_all_entries_from_postgres
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from ecdsa import SigningKey, VerifyingKey, NIST384p
@@ -180,6 +180,16 @@ def search_by_id():
         search_result = search_by_id_in_postgres(search_id)
         return render_template('search_id_results.html', search_id=search_id, result=search_result)
     return render_template('search_id.html')
+
+# Route to delete all entries in the database
+@app.route('/delete_all', methods=['POST'])
+def delete_all():
+    try:
+        delete_all_entries_from_postgres()
+        flash('All entries have been successfully deleted.')
+    except Exception as e:
+        flash(f"An error occurred while deleting entries: {str(e)}")
+    return redirect(url_for('home'))
 
 # Run the Flask application
 if __name__ == '__main__':
