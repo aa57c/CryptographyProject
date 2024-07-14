@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Encrypt Data</title>
+    <title>Add Patient Data</title>
     <!-- Materialize CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
 </head>
@@ -10,25 +10,29 @@
     <!-- Navbar -->
     <nav>
         <div class="nav-wrapper">
-            <a href="#" class="brand-logo">Cryptography Project</a>
+            <a href="#" class="brand-logo">Healthcare Cryptography Project</a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('encrypt_text') }}">Encrypt Text</a></li>
-                <li><a href="{{ url_for('decrypt_text') }}">Decrypt Text</a></li>
+                <li><a href="{{ url_for('add_patient') }}">Add Patient</a></li>
+                <li><a href="{{ url_for('decrypt_patient') }}">Decrypt Patient Data</a></li>
                 <li><a href="{{ url_for('view_database') }}">View Database</a></li>
-                <li><a href="{{ url_for('search_by_id') }}">Search by ID</a></li>
+                <li><a href="{{ url_for('search_patient') }}">Search Patient</a></li>
             </ul>
         </div>
     </nav>
 
     <div class="container">
-        <h1>Encrypt Data</h1>
-        <form method="post" action="/encrypt">
+        <h1>Add Patient Data</h1>
+        <form method="post" action="/add_patient">
             <div class="input-field">
-                <label for="text">Text:</label>
-                <input type="text" id="text" name="text" required>
+                <label for="name">Patient Name:</label>
+                <input type="text" id="name" name="name" required>
             </div>
-            <button class="btn" type="submit">Encrypt</button>
+            <div class="input-field">
+                <label for="data">Patient Data:</label>
+                <textarea id="data" name="data" class="materialize-textarea" required></textarea>
+            </div>
+            <button class="btn" type="submit">Add Patient</button>
         </form>
         <a href="{{ url_for('home') }}" class="btn">Go to Home</a>
     </div>
@@ -42,4 +46,5 @@
     </script>
 </body>
 </html>
+
 

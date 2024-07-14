@@ -18,8 +18,8 @@ def table_exists(cur, table_name):
     """, (table_name,))
     return cur.fetchone()[0]
 
-# Function to create or update table and save a string to PostgreSQL
-def save_data_to_postgres(aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key):
+# Function to create or update table and save patient data to PostgreSQL
+def save_patient_data_to_postgres(patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key):
     try:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
@@ -34,11 +34,12 @@ def save_data_to_postgres(aes_encrypted_data, pqc_encrypted_key, ecc_signature, 
         cur = conn.cursor()
 
         # Check if table exists
-        if not table_exists(cur, 'encrypted_data'):
+        if not table_exists(cur, 'patient_data'):
             # Create table if it doesn't exist
             cur.execute("""
-                CREATE TABLE encrypted_data (
+                CREATE TABLE patient_data (
                     id SERIAL PRIMARY KEY,
+                    patient_name TEXT,
                     aes_encrypted_data TEXT,
                     pqc_encrypted_key TEXT,
                     ecc_signature TEXT,
@@ -46,13 +47,13 @@ def save_data_to_postgres(aes_encrypted_data, pqc_encrypted_key, ecc_signature, 
                     pqc_private_key TEXT
                 )
             """)
-            print("Table 'encrypted_data' created successfully!")
+            print("Table 'patient_data' created successfully!")
 
-        # Insert the data into the table
+        # Insert the patient data into the table
         cur.execute("""
-            INSERT INTO encrypted_data (aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key))
+            INSERT INTO patient_data (patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key))
         
         # Commit the transaction
         conn.commit()
@@ -61,13 +62,13 @@ def save_data_to_postgres(aes_encrypted_data, pqc_encrypted_key, ecc_signature, 
         cur.close()
         conn.close()
         
-        print("Data saved successfully to PostgreSQL!")
+        print("Patient data saved successfully to PostgreSQL!")
 
     except Exception as e:
-        print(f"Error saving data to PostgreSQL: {e}")
+        print(f"Error saving patient data to PostgreSQL: {e}")
 
-# Function to retrieve the latest entry from PostgreSQL
-def retrieve_latest_entry_from_postgres():
+# Function to retrieve the latest patient entry from PostgreSQL
+def retrieve_latest_patient_from_postgres():
     try:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
@@ -81,10 +82,10 @@ def retrieve_latest_entry_from_postgres():
         # Open a cursor to perform database operations
         cur = conn.cursor()
 
-        # Retrieve the latest entry from the table
+        # Retrieve the latest patient entry from the table
         cur.execute("""
-            SELECT aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
-            FROM encrypted_data ORDER BY id DESC LIMIT 1
+            SELECT patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+            FROM patient_data ORDER BY id DESC LIMIT 1
         """)
         result = cur.fetchone()
 
@@ -95,11 +96,11 @@ def retrieve_latest_entry_from_postgres():
         return result
 
     except Exception as e:
-        print(f"Error retrieving data from PostgreSQL: {e}")
+        print(f"Error retrieving patient data from PostgreSQL: {e}")
         return None
 
-# Function to retrieve all entries from PostgreSQL
-def retrieve_all_entries_from_postgres():
+# Function to retrieve all patient entries from PostgreSQL
+def retrieve_all_patients_from_postgres():
     try:
         conn = psycopg2.connect(
             dbname=dbname,
@@ -110,19 +111,19 @@ def retrieve_all_entries_from_postgres():
         )
         cur = conn.cursor()
         cur.execute("""
-            SELECT id, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
-            FROM encrypted_data ORDER BY id
+            SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+            FROM patient_data ORDER BY id
         """)
         results = cur.fetchall()
         cur.close()
         conn.close()
         return results
     except Exception as e:
-        print(f"Error retrieving all data from PostgreSQL: {e}")
+        print(f"Error retrieving all patient data from PostgreSQL: {e}")
         return []
 
-# Function to search for records in the database by ID
-def search_by_id_in_postgres(search_id):
+# Function to search for patient records in the database by ID
+def search_patient_by_id_in_postgres(search_id):
     try:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
@@ -138,8 +139,8 @@ def search_by_id_in_postgres(search_id):
 
         # Perform the search query by ID
         cur.execute("""
-            SELECT id, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
-            FROM encrypted_data WHERE id = %s
+            SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+            FROM patient_data WHERE id = %s
         """, (search_id,))
         result = cur.fetchone()
 
@@ -150,9 +151,10 @@ def search_by_id_in_postgres(search_id):
         return result
 
     except Exception as e:
-        print(f"Error searching by ID in PostgreSQL: {e}")
+        print(f"Error searching patient data by ID in PostgreSQL: {e}")
         return None
-# Function to delete all entries from PostgreSQL
+
+# Function to delete all patient entries from PostgreSQL
 def delete_all_entries_from_postgres():
     try:
         conn = psycopg2.connect(
@@ -163,9 +165,9 @@ def delete_all_entries_from_postgres():
             port=port
         )
         cur = conn.cursor()
-        cur.execute("DELETE FROM encrypted_data")
+        cur.execute("DELETE FROM patient_data")
         conn.commit()
         cur.close()
         conn.close()
     except Exception as e:
-        print(f"Error deleting all entries from PostgreSQL: {e}")
+        print(f"Error deleting all patient entries from PostgreSQL: {e}")

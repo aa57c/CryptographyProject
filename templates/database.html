@@ -10,13 +10,13 @@
     <!-- Navbar -->
     <nav>
         <div class="nav-wrapper">
-            <a href="#" class="brand-logo">Cryptography Project</a>
+            <a href="#" class="brand-logo">Healthcare Cryptography Project</a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('encrypt_text') }}">Encrypt Text</a></li>
-                <li><a href="{{ url_for('decrypt_text') }}">Decrypt Text</a></li>
+                <li><a href="{{ url_for('add_patient') }}">Add Patient</a></li>
+                <li><a href="{{ url_for('decrypt_patient') }}">Decrypt Patient Data</a></li>
                 <li><a href="{{ url_for('view_database') }}">View Database</a></li>
-                <li><a href="{{ url_for('search_by_id') }}">Search by ID</a></li>
+                <li><a href="{{ url_for('search_patient') }}">Search Patient</a></li>
             </ul>
         </div>
     </nav>
@@ -27,6 +27,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Patient Name</th>
                     <th>AES Encrypted Data</th>
                     <th>PQC Encrypted Key</th>
                     <th>ECC Signature</th>
@@ -43,6 +44,7 @@
                         <td>{{ item[3] }}</td>
                         <td>{{ item[4] }}</td>
                         <td>{{ item[5] }}</td>
+                        <td>{{ item[6] }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -59,4 +61,5 @@
     </script>
 </body>
 </html>
+
 

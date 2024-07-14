@@ -10,19 +10,12 @@
     <!-- Navbar -->
     <nav>
         <div class="nav-wrapper">
-            <a href="#" class="brand-logo">Cryptography Project</a>
-            <!--- <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li><a href="{{ url_for('encrypt_text') }}">Encrypt Text</a></li>
-                <li><a href="{{ url_for('decrypt_text') }}">Decrypt Text</a></li>
-                <li><a href="{{ url_for('view_database') }}">View Database</a></li>
-                <li><a href="{{ url_for('search_by_id') }}">Search by ID</a></li>
-            </ul> -->
-            
+            <a href="#" class="brand-logo">Healthcare Cryptography Project</a>
         </div>
     </nav>
 
     <div class="container">
-        <h1>Cryptography Demonstration</h1>
+        <h1>Healthcare Cryptography Demonstration</h1>
 
         <!-- Display flashed messages -->
         {% with messages = get_flashed_messages() %}
@@ -38,10 +31,10 @@
         {% endwith %}
 
         <ul class="collection">
-            <li class="collection-item"><a href="{{ url_for('encrypt_text') }}">Encrypt and Save Text</a></li>
-            <li class="collection-item"><a href="{{ url_for('decrypt_text') }}">Retrieve and Decrypt Text</a></li>
+            <li class="collection-item"><a href="{{ url_for('add_patient') }}">Add Patient Data</a></li>
+            <li class="collection-item"><a href="{{ url_for('decrypt_patient') }}">Retrieve and Decrypt Patient Data</a></li>
             <li class="collection-item"><a href="{{ url_for('view_database') }}">View Database</a></li>
-            <li class="collection-item"><a href="{{ url_for('search_by_id') }}">Search by ID</a></li>
+            <li class="collection-item"><a href="{{ url_for('search_patient') }}">Search Patient by ID</a></li>
         </ul>
 
         <form method="post" action="{{ url_for('delete_all') }}">
@@ -58,4 +51,5 @@
     </script>
 </body>
 </html>
+
 
