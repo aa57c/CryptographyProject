@@ -22,8 +22,8 @@
     </nav>
 
     <div class="container">
-        <h1>Search Results for Patient ID "{{ patient_id }}"</h1>
-        {% if result %}
+        <h1>Search Results for {{ patient_id if patient_id else patient_name }}</h1>
+        {% if results %}
             <table class="highlight responsive-table">
                 <thead>
                     <tr>
@@ -34,22 +34,31 @@
                         <th>ECC Signature</th>
                         <th>ECC Verifying Key</th>
                         <th>PQC Private Key</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>{{ result[0] }}</td>
-                        <td>{{ result[1] }}</td>
-                        <td>{{ result[2] }}</td>
-                        <td>{{ result[3] }}</td>
-                        <td>{{ result[4] }}</td>
-                        <td>{{ result[5] }}</td>
-                        <td>{{ result[6] }}</td>
-                    </tr>
+                    {% for result in results %}
+                        <tr>
+                            <td>{{ result[0] }}</td>
+                            <td>{{ result[1] }}</td>
+                            <td>{{ result[2] }}</td>
+                            <td>{{ result[3] }}</td>
+                            <td>{{ result[4] }}</td>
+                            <td>{{ result[5] }}</td>
+                            <td>{{ result[6] }}</td>
+                            <td>
+                                <form method="post" action="{{ url_for('delete_entry') }}">
+                                    <input type="hidden" name="entry_id" value="{{ result[0] }}">
+                                    <button class="btn red" type="submit">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p>No data found for Patient ID "{{ patient_id }}"</p>
+            <p>No data found for {{ patient_id if patient_id else patient_name }}</p>
         {% endif %}
         <a href="{{ url_for('search_patient') }}" class="btn">Back to Search</a>
         <a href="{{ url_for('home') }}" class="btn">Back to Home</a>

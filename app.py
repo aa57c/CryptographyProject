@@ -7,7 +7,7 @@
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 import os
-from postgres_interaction import delete_all_entries_from_postgres, save_patient_data_to_postgres, retrieve_latest_patient_from_postgres, search_patient_by_id_in_postgres, retrieve_all_patients_from_postgres
+from postgres_interaction import delete_all_entries_from_postgres, delete_entry_by_id_or_name_from_postgres, save_patient_data_to_postgres, retrieve_latest_patient_from_postgres, search_patient_by_id_in_postgres, retrieve_all_patients_from_postgres, search_patient_by_id_or_name_in_postgres
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from ecdsa import SigningKey, VerifyingKey, NIST384p
@@ -174,14 +174,27 @@ def view_database():
     # Pass the data to the template for rendering
     return render_template('database.html', data=all_data)
 
-# Route to search the database by patient ID
+# Route to search patient by ID or name
 @app.route('/search_patient', methods=['GET', 'POST'])
 def search_patient():
     if request.method == 'POST':
-        patient_id = request.form['patient_id']
-        search_result = search_patient_by_id_in_postgres(patient_id)
-        return render_template('search_patient_results.html', patient_id=patient_id, result=search_result)
+        patient_id = request.form.get('patient_id')
+        patient_name = request.form.get('patient_name')
+        search_results = search_patient_by_id_or_name_in_postgres(patient_id, patient_name)
+        return render_template('search_patient_results.html', patient_id=patient_id, patient_name=patient_name, results=search_results)
     return render_template('search_patient.html')
+
+# Route to delete entry by ID or name
+@app.route('/delete_entry', methods=['POST'])
+def delete_entry():
+    entry_id = request.form.get('entry_id')
+    entry_name = request.form.get('entry_name')
+    try:
+        delete_entry_by_id_or_name_from_postgres(entry_id, entry_name)
+        flash('Entry has been successfully deleted.')
+    except Exception as e:
+        flash(f"An error occurred while deleting the entry: {str(e)}")
+    return redirect(url_for('home'))
 
 # Route to delete all entries in the database
 @app.route('/delete_all', methods=['POST'])

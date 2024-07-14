@@ -171,3 +171,68 @@ def delete_all_entries_from_postgres():
         conn.close()
     except Exception as e:
         print(f"Error deleting all patient entries from PostgreSQL: {e}")
+# Function to search for patient records in the database by ID or name
+def search_patient_by_id_or_name_in_postgres(patient_id=None, patient_name=None):
+    try:
+        # Connect to PostgreSQL database
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
+
+        # Open a cursor to perform database operations
+        cur = conn.cursor()
+
+        # Perform the search query by ID or name
+        if patient_id:
+            cur.execute("""
+                SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+                FROM patient_data WHERE id = %s
+            """, (patient_id,))
+        elif patient_name:
+            cur.execute("""
+                SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+                FROM patient_data WHERE patient_name ILIKE %s
+            """, (f'%{patient_name}%',))
+        else:
+            return []
+
+        results = cur.fetchall()
+
+        # Close cursor and connection
+        cur.close()
+        conn.close()
+
+        return results
+
+    except Exception as e:
+        print(f"Error searching patient data by ID or name in PostgreSQL: {e}")
+        return []
+
+# Function to delete entries by ID or name from PostgreSQL
+def delete_entry_by_id_or_name_from_postgres(entry_id=None, entry_name=None):
+    try:
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
+        cur = conn.cursor()
+
+        if entry_id:
+            cur.execute("DELETE FROM patient_data WHERE id = %s", (entry_id,))
+        elif entry_name:
+            cur.execute("DELETE FROM patient_data WHERE patient_name ILIKE %s", (f'%{entry_name}%',))
+        else:
+            return
+
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error deleting entries from PostgreSQL: {e}")
