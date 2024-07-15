@@ -1,0 +1,32 @@
+{% extends "index.html" %}
+
+{% block title %}Home - Healthcare Cryptography Project{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Add Patient Data</h1>
+        <form method="post" action="/add_patient">
+            <div class="input-field">
+                <label for="name">Patient Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="input-field">
+                <label for="data">Patient Data:</label>
+                <textarea id="data" name="data" class="materialize-textarea" required></textarea>
+            </div>
+            <a href="{{ url_for('home') }}" type="button" class="btn red">Back to Home</a>
+            <button class="btn" type="submit">Add Patient</button>
+            
+        </form>
+    </div>
+
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.AutoInit();
+        });
+    </script>
+{% endblock %}
+
+

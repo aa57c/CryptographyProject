@@ -1,34 +1,25 @@
-# We might need to specify database for futher work so I am leaving this here for quick reference
-# if needed.
+# We might need to specify the database for further work so I am leaving this here for quick reference if needed.
 # import dj_database_url
 
 # DATABASES = {
 #     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 # }
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 import os
-from postgres_interaction import save_string_to_postgres, retrieve_string_from_postgres
+from postgres_interaction import delete_all_entries_from_postgres, delete_entry_by_id_or_name_from_postgres, save_patient_data_to_postgres, retrieve_latest_patient_from_postgres, search_patient_by_id_in_postgres, retrieve_all_patients_from_postgres, search_patient_by_id_or_name_in_postgres
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from ecdsa import SigningKey, VerifyingKey, NIST384p
 import pqcryptography as pqc
 import base64
-import json
 
 # Initialize Flask application
 app = Flask(__name__)
+# app = Flask(__name__, static_folder='app/static')
+app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
-# Database connection parameters
-# dbname = "mydatabase"
-# user = "postgres"
-# password = "password"
-# host = "db"
-# port = "5432"
-
-'''
 # AES Encryption
-
 def aes_encrypt(data, key):
     cipher = AES.new(key, AES.MODE_EAX)
     ciphertext, tag = cipher.encrypt_and_digest(data)
@@ -41,122 +32,181 @@ def aes_decrypt(encrypted_data, key):
     cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
     return cipher.decrypt_and_verify(ciphertext, tag).decode('utf-8')
 
-# PQC Key Encapsulation (Encryption)
-def pqc_encapsulate(aes_key):
-    kem = liboqs.KeyEncapsulation('Kyber512')
-    public_key = kem.generate_keypair()
-    ciphertext, shared_secret = kem.encap_secret(public_key)
-    return base64.b64encode(ciphertext).decode('utf-8'), base64.b64encode(public_key).decode('utf-8'), base64.b64encode(kem.export_secret_key()).decode('utf-8')
+# PQC Encrypt (using default Kyber1024)
+def pqc_encrypt(public_key, data):
+    return pqc.encryption.encrypt(public_key, data.encode('utf-8'))
 
-# PQC Key Decapsulation (Decryption)
-def pqc_decapsulate(ciphertext, secret_key, public_key):
-    kem = liboqs.KeyEncapsulation('Kyber512', secret_key=base64.b64decode(secret_key))
-    kem.set_public_key(base64.b64decode(public_key))
-    shared_secret = kem.decap_secret(base64.b64decode(ciphertext))
-    return shared_secret
+# PQC Decrypt (using default Kyber1024)
+def pqc_decrypt(private_key, encrypted_data):
+    return pqc.encryption.decrypt(private_key, encrypted_data).decode('utf-8')
 
+# ECC Sign
+def ecc_sign(data):
+    sk = SigningKey.generate(curve=NIST384p)
+    vk = sk.verifying_key
+    signature = sk.sign(data)
+    return signature, vk
 
-# ECC Key Generation
-def generate_ecc_key():
-    # Generate ECC key
-    # sk = SigningKey.generate(curve=NIST384p)
-    # vk = sk.verifying_key
-    # return sk, vk
+# ECC Verify
+def ecc_verify(signature, data, vk):
+    return vk.verify(signature, data)
 
-# ECC Signing
-def ecc_sign(data, sk):
-    # ECC signing
-    # signature = sk.sign(data.encode('utf-8'))
-    # return base64.b64encode(signature).decode('utf-8')
+# Home Route
+@app.route('/')
+def home():
+    return render_template('home.html')
 
-# ECC Verification
-def ecc_verify(data, signature, vk):
-    # verification
-    #try:
-    #    vk.verify(base64.b64decode(signature), data.encode('utf-8'))
-    #    return True
-    #except:
-    #    return False
-
-# Example Post-Quantum Encryption function
-def pqc_encrypt(data):
-    # Implement the specific post-quantum encryption here
-    return data
-
-# Example Post-Quantum Decryption function
-def pqc_decrypt(data):
-    # Implement the specific post-quantum decryption here
-    return data
-'''
-
-# Route to save text to the database
-@app.route('/', methods=['GET', 'POST'])
-def save_text():
-    
+# Route to add patient and encrypt data
+@app.route('/add_patient', methods=['GET', 'POST'])
+def add_patient():
     if request.method == 'POST':
+        patient_name = request.form['name']
+        patient_data = request.form['data']
+
+        # Generate a random AES key
+        aes_key = get_random_bytes(32)
+
+        # Encrypt the patient data using AES
+        aes_encrypted_data = aes_encrypt(patient_data.encode('utf-8'), aes_key)
+
+        # Generate PQC key pair (using default Kyber1024)
+        public_key, private_key = pqc.encryption.generate_keypair()
+
+        # Encrypt the AES key using PQC
+        pqc_encrypted_aes_key = pqc_encrypt(public_key, base64.b64encode(aes_key).decode('utf-8'))
+
+        # Sign the AES encrypted data using ECC
+        ecc_signature, ecc_verifying_key = ecc_sign(aes_encrypted_data.encode('utf-8'))
+
+        # Save patient data to the database
+        save_patient_data_to_postgres(
+            patient_name,
+            aes_encrypted_data,
+            base64.b64encode(pqc_encrypted_aes_key).decode('utf-8'),
+            base64.b64encode(ecc_signature).decode('utf-8'),
+            base64.b64encode(ecc_verifying_key.to_string()).decode('utf-8'),
+            base64.b64encode(private_key).decode('utf-8')
+        )
+
+        # Flash a success message
+        flash('Patient data has been successfully encrypted and saved!')
+
+        return redirect(url_for('home'))
+    return render_template('add_patient.html')
+
+# Route to retrieve and verify patient data
+@app.route('/verify_patient', methods=['GET', 'POST'])
+def verify_patient():
+    if request.method == 'POST':
+        patient_id = request.form.get('patient_id')
+
+        if patient_id:
+            stored_data = search_patient_by_id_in_postgres(patient_id)
+        else:
+            stored_data = retrieve_latest_patient_from_postgres()
         
-        text = request.form['text']
+        if not stored_data:
+            flash("No data found with the provided ID.")
+            return redirect(url_for('home'))
 
-        '''
-        # AES encryption
-        aes_key = get_random_bytes(32) # AES-256
-        aes_encrypted = aes_encrypt(text.encode('utf-8'), aes_key)
+        patient_id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key = stored_data
 
-        # PQC encryption of AES key
-        pqc_ciphertext, pqc_public_key, pqc_secret_key = pqc_encapsulate(aes_key)
+        # Decode data from storage
+        ecc_signature = base64.b64decode(ecc_signature)
+        ecc_verifying_key = VerifyingKey.from_string(base64.b64decode(ecc_verifying_key), curve=NIST384p)
 
-        # ECC key generation and signing
-        # sk, vk = generate_ecc_key()
-        # ecc_signature = ecc_sign(text, sk)
-        # PQC encryption (example)
-        # pqc_encrypted = pqc_encrypt(text)
+        try:
+            # Verify the signature using ECC
+            if ecc_verify(ecc_signature, aes_encrypted_data.encode('utf-8'), ecc_verifying_key):
+                flash('Signature verified. You can now decrypt the data.')
+                return render_template('decrypt_patient.html', verified=True, patient_id=patient_id, patient_name=patient_name, aes_encrypted_data=aes_encrypted_data)
+            else:
+                flash('Signature verification failed. Data integrity could not be confirmed.')
+                return redirect(url_for('home'))
+        except Exception as e:
+            flash(f"An error occurred: {str(e)}")
+            return redirect(url_for('home'))
+    return render_template('verify_patient.html', patient_name=patient_name, aes_encrypted_data=aes_encrypted_data)
 
-        # Prepare data to be saved
-        text_data = {
-            'aes_encrypted': aes_encrypted,
-            'pqc_ciphertext': pqc_ciphertext,
-            'pqc_public_key': pqc_public_key,
-            'pqc_secret_key': pqc_secret_key,
-            #'ecc_signature': ecc_signature,
-            #'ecc_verifying_key': vk.to_string().hex(),
-            #'pqc_encrypted': pqc_encrypted
-        }
-        '''
-        save_string_to_postgres(json.dumps(text))
-        
-        return redirect(url_for('retrieve_text'))
-    return render_template('message_save.html')
+# Route to retrieve and decrypt patient data from the database
+@app.route('/decrypt_patient', methods=['GET', 'POST'])
+def decrypt_patient():
+    if request.method == 'POST':
+        if 'verify' in request.form:
+            return verify_patient()
 
-# Route to retrieve and display text from the database
-@app.route('/retrieve', methods=['GET'])
-def retrieve_text():
-    
-    text = retrieve_string_from_postgres()
-    '''
+        if 'decrypt' in request.form:
+            patient_id = request.form.get('patient_id')
+            if patient_id:
+                stored_data = search_patient_by_id_in_postgres(patient_id)
+            else:
+                stored_data = retrieve_latest_patient_from_postgres()
 
-    aes_encrypted = text_data['aes_encrypted']
-    pqc_ciphertext = text_data['pqc_ciphertext']
-    pqc_public_key = text_data['pqc_public_key']
-    pqc_secret_key = text_data['pqc_secret_key']
-    # ecc_signature = text_data['ecc_signature']
-    # ecc_verifying_key_hex = text_data['ecc_verifying_key']
-    # pqc_encrypted = text_data['pqc_encrypted']
+            if not stored_data:
+                flash("No data found with the provided ID.")
+                return render_template('decrypt_patient.html')
 
-    # PQC decryption of AES key
-    aes_key = pqc_decapsulate(pqc_ciphertext, pqc_secret_key, pqc_public_key)
+            patient_id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key = stored_data
 
-    # AES decryption
-    aes_decrypted = aes_decrypt(aes_encrypted, aes_key)
+            # Decode data from storage
+            pqc_encrypted_key = base64.b64decode(pqc_encrypted_key)
+            pqc_private_key = base64.b64decode(pqc_private_key)
 
-    # ECC verification
-    # vk = VerifyingKey.from_string(bytes.fromhex(ecc_verifying_key_hex), curve=NIST384p)
-    # ecc_verified = ecc_verify(aes_decrypted, ecc_signature, vk)
-    
-    # PQC decryption (example)
-    # pqc_decrypted = pqc_decrypt(pqc_encrypted)
-    '''
+            try:
+                # Decrypt AES key using PQC
+                decrypted_aes_key = base64.b64decode(pqc_decrypt(pqc_private_key, pqc_encrypted_key))
 
-    return render_template('message_view.html', text=text)
+                # Decrypt text using AES
+                decrypted_text = aes_decrypt(aes_encrypted_data, decrypted_aes_key)
+
+                # Flash a success message
+                flash('Patient data has been successfully decrypted!')
+                
+                return render_template('decrypt_patient.html', patient_name=patient_name, data=decrypted_text, aes_encrypted_data=aes_encrypted_data, verified=True)
+            except Exception as e:
+                flash(f"An error occurred: {str(e)}")
+                return render_template('decrypt_patient.html')
+    return render_template('decrypt_patient.html')
+
+# Route to display the database contents
+@app.route('/database', methods=['GET'])
+def view_database():
+    # Retrieve all records from the database
+    all_data = retrieve_all_patients_from_postgres()
+    # Pass the data to the template for rendering
+    return render_template('database.html', data=all_data)
+
+# Route to search patient by ID or name
+@app.route('/search_patient', methods=['GET', 'POST'])
+def search_patient():
+    if request.method == 'POST':
+        patient_id = request.form.get('patient_id')
+        patient_name = request.form.get('patient_name')
+        search_results = search_patient_by_id_or_name_in_postgres(patient_id, patient_name)
+        return render_template('search_patient_results.html', patient_id=patient_id, patient_name=patient_name, results=search_results)
+    return render_template('search_patient.html')
+
+# Route to delete entry by ID or name
+@app.route('/delete_entry', methods=['POST'])
+def delete_entry():
+    entry_id = request.form.get('entry_id')
+    entry_name = request.form.get('entry_name')
+    try:
+        delete_entry_by_id_or_name_from_postgres(entry_id, entry_name)
+        flash('Entry has been successfully deleted.')
+    except Exception as e:
+        flash(f"An error occurred while deleting the entry: {str(e)}")
+    return redirect(url_for('home'))
+
+# Route to delete all entries in the database
+@app.route('/delete_all', methods=['POST'])
+def delete_all():
+    try:
+        delete_all_entries_from_postgres()
+        flash('All entries have been successfully deleted.')
+    except Exception as e:
+        flash(f"An error occurred while deleting entries: {str(e)}")
+    return redirect(url_for('home'))
 
 # Run the Flask application
 if __name__ == '__main__':
