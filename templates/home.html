@@ -1,24 +1,17 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Home</title>
-    <!-- Materialize CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav>
-        <div class="nav-wrapper">
-            <a href="#" class="brand-logo">Healthcare Cryptography Project</a>
-        </div>
-    </nav>
+{% extends "index.html" %}
 
-    <div class="container">
-        <h1>Healthcare Cryptography Demonstration</h1>
+{% block title %}Home - Healthcare Cryptography Project{% endblock %}
 
+{% block content %}
+    <div class="col-md-12">
+        <h3>Healthcare Cryptography Demonstration</h3>
+        <p> Welcome in this short demonstration we will show how encrypted data gets saved 
+            in the database and how does decryption works!<br /> <br />
+            Use the menu below to navigate through the demonstration.
+
+        </p>
         <!-- Display flashed messages -->
-        {% with messages = get_flashed_messages() %}
+         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <div class="card-panel teal lighten-2">
                     <ul>
@@ -55,5 +48,4 @@
             }
         }
     </script>
-</body>
-</html>
+{% endblock %}

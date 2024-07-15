@@ -1,31 +1,13 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Search Results</title>
-    <!-- Materialize CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav>
-        <div class="nav-wrapper">
-            <a href="#" class="brand-logo">Healthcare Cryptography Project</a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('add_patient') }}">Add Patient</a></li>
-                <li><a href="{{ url_for('decrypt_patient') }}">Decrypt Patient Data</a></li>
-                <li><a href="{{ url_for('view_database') }}">View Database</a></li>
-                <li><a href="{{ url_for('search_patient') }}">Search Patient</a></li>
-            </ul>
-        </div>
-    </nav>
+{% extends "index.html" %}
 
-    <div class="container">
-        <h1>Search Results for {{ patient_id if patient_id else patient_name }}</h1>
+{% block title %}Home - Healthcare Cryptography Project{% endblock %}
+
+{% block content %}
+    <div class="col-md-12">
+        <h1>Search Results for: {{ results[0][1] if results[0] else patient_id }}</h1>
         {% if results %}
-            <table class="highlight responsive-table">
-                <thead>
+            <table class="table table-striped table-sm">
+                <thead class="thead-dark">
                     <tr>
                         <th>ID</th>
                         <th>Patient Name</th>
@@ -40,13 +22,13 @@
                 <tbody>
                     {% for result in results %}
                         <tr>
-                            <td>{{ result[0] }}</td>
-                            <td>{{ result[1] }}</td>
-                            <td>{{ result[2] }}</td>
-                            <td>{{ result[3] }}</td>
-                            <td>{{ result[4] }}</td>
-                            <td>{{ result[5] }}</td>
-                            <td>{{ result[6] }}</td>
+                            <td >{{ result[0] }}</td>
+                            <td >{{ result[1] }}</td>
+                            <td style="word-break: break-all">{{ result[2] }}</td>
+                            <td style="word-break: break-all">{{ result[3] }}</td>
+                            <td style="word-break: break-all">{{ result[4] }}</td>
+                            <td style="word-break: break-all">{{ result[5] }}</td>
+                            <td style="word-break: break-all">{{ result[6] }}</td>
                             <td>
                                 <form method="post" action="{{ url_for('delete_entry') }}">
                                     <input type="hidden" name="entry_id" value="{{ result[0] }}">
@@ -58,10 +40,10 @@
                 </tbody>
             </table>
         {% else %}
-            <p>No data found for {{ patient_id if patient_id else patient_name }}</p>
+            <p>No data found for {{ patient_name if patient_name else patient_id }}</p>
         {% endif %}
         <a href="{{ url_for('search_patient') }}" class="btn">Back to Search</a>
-        <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
+        <a href="{{ url_for('home') }}" class="btn red">Back to Home</a>
     </div>
 
     <!-- Materialize JavaScript -->
@@ -71,5 +53,9 @@
             M.AutoInit();
         });
     </script>
-</body>
-</html>
+
+
+{% endblock %}
+
+
+

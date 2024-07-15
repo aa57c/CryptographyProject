@@ -16,6 +16,7 @@ import base64
 
 # Initialize Flask application
 app = Flask(__name__)
+# app = Flask(__name__, static_folder='app/static')
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
 # AES Encryption
@@ -98,16 +99,17 @@ def add_patient():
 def verify_patient():
     if request.method == 'POST':
         patient_id = request.form.get('patient_id')
+
         if patient_id:
             stored_data = search_patient_by_id_in_postgres(patient_id)
         else:
             stored_data = retrieve_latest_patient_from_postgres()
-
+        
         if not stored_data:
             flash("No data found with the provided ID.")
             return redirect(url_for('home'))
 
-        patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key = stored_data
+        patient_id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key = stored_data
 
         # Decode data from storage
         ecc_signature = base64.b64decode(ecc_signature)
@@ -117,14 +119,14 @@ def verify_patient():
             # Verify the signature using ECC
             if ecc_verify(ecc_signature, aes_encrypted_data.encode('utf-8'), ecc_verifying_key):
                 flash('Signature verified. You can now decrypt the data.')
-                return render_template('decrypt_patient.html', verified=True, patient_id=patient_id)
+                return render_template('decrypt_patient.html', verified=True, patient_id=patient_id, patient_name=patient_name, aes_encrypted_data=aes_encrypted_data)
             else:
                 flash('Signature verification failed. Data integrity could not be confirmed.')
                 return redirect(url_for('home'))
         except Exception as e:
             flash(f"An error occurred: {str(e)}")
             return redirect(url_for('home'))
-    return render_template('verify_patient.html')
+    return render_template('verify_patient.html', patient_name=patient_name, aes_encrypted_data=aes_encrypted_data)
 
 # Route to retrieve and decrypt patient data from the database
 @app.route('/decrypt_patient', methods=['GET', 'POST'])
@@ -144,7 +146,7 @@ def decrypt_patient():
                 flash("No data found with the provided ID.")
                 return render_template('decrypt_patient.html')
 
-            patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key = stored_data
+            patient_id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key = stored_data
 
             # Decode data from storage
             pqc_encrypted_key = base64.b64decode(pqc_encrypted_key)
@@ -160,7 +162,7 @@ def decrypt_patient():
                 # Flash a success message
                 flash('Patient data has been successfully decrypted!')
                 
-                return render_template('decrypt_patient.html', patient_name=patient_name, data=decrypted_text, verified=True)
+                return render_template('decrypt_patient.html', patient_name=patient_name, data=decrypted_text, aes_encrypted_data=aes_encrypted_data, verified=True)
             except Exception as e:
                 flash(f"An error occurred: {str(e)}")
                 return render_template('decrypt_patient.html')

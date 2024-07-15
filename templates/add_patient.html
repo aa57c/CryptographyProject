@@ -1,26 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Patient Data</title>
-    <!-- Materialize CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav>
-        <div class="nav-wrapper">
-            <a href="#" class="brand-logo">Healthcare Cryptography Project</a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('add_patient') }}">Add Patient</a></li>
-                <li><a href="{{ url_for('decrypt_patient') }}">Decrypt Patient Data</a></li>
-                <li><a href="{{ url_for('view_database') }}">View Database</a></li>
-                <li><a href="{{ url_for('search_patient') }}">Search Patient</a></li>
-            </ul>
-        </div>
-    </nav>
+{% extends "index.html" %}
 
+{% block title %}Home - Healthcare Cryptography Project{% endblock %}
+
+{% block content %}
     <div class="container">
         <h1>Add Patient Data</h1>
         <form method="post" action="/add_patient">
@@ -32,9 +14,10 @@
                 <label for="data">Patient Data:</label>
                 <textarea id="data" name="data" class="materialize-textarea" required></textarea>
             </div>
+            <a href="{{ url_for('home') }}" type="button" class="btn red">Back to Home</a>
             <button class="btn" type="submit">Add Patient</button>
+            
         </form>
-        <a href="{{ url_for('home') }}" class="btn">Go to Home</a>
     </div>
 
     <!-- Materialize JavaScript -->
@@ -44,7 +27,6 @@
             M.AutoInit();
         });
     </script>
-</body>
-</html>
+{% endblock %}
 
 

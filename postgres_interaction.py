@@ -84,7 +84,7 @@ def retrieve_latest_patient_from_postgres():
 
         # Retrieve the latest patient entry from the table
         cur.execute("""
-            SELECT patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+            SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
             FROM patient_data ORDER BY id DESC LIMIT 1
         """)
         result = cur.fetchone()

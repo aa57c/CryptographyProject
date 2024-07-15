@@ -1,48 +1,31 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Search Patient</title>
-    <!-- Materialize CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav>
-        <div class="nav-wrapper">
-            <a href="#" class="brand-logo">Healthcare Cryptography Project</a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('add_patient') }}">Add Patient</a></li>
-                <li><a href="{{ url_for('decrypt_patient') }}">Decrypt Patient Data</a></li>
-                <li><a href="{{ url_for('view_database') }}">View Database</a></li>
-                <li><a href="{{ url_for('search_patient') }}">Search Patient</a></li>
-            </ul>
+{% extends "index.html" %}
+
+{% block title %}Home - Healthcare Cryptography Project{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Search Patient</h1>
+    <p> Search by ID or by Name. ID will be given preference over Name when searching. If you dont know the ID leave it blank.</p>
+    <form method="POST" action="{{ url_for('search_patient') }}">
+        <div class="input-field">
+            <label for="patient_id">Patient ID:</label>
+            <input type="number" id="patient_id" name="patient_id">
         </div>
-    </nav>
+        <div class="input-field">
+            <label for="patient_name">Patient Name:</label>
+            <input type="text" id="patient_name" name="patient_name">
+        </div>
+        <a href="{{ url_for('home') }}" class="btn red">Back to Home</a>
+        <button class="btn" type="submit">Search</button>
+    </form>
+    
+</div>
 
-    <div class="container">
-        <h1>Search Patient</h1>
-        <form method="POST" action="{{ url_for('search_patient') }}">
-            <div class="input-field">
-                <label for="patient_id">Patient ID:</label>
-                <input type="number" id="patient_id" name="patient_id">
-            </div>
-            <div class="input-field">
-                <label for="patient_name">Patient Name:</label>
-                <input type="text" id="patient_name" name="patient_name">
-            </div>
-            <button class="btn" type="submit">Search</button>
-        </form>
-        <a href="{{ url_for('home') }}" class="btn">Back to Home</a>
-    </div>
-
-    <!-- Materialize JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            M.AutoInit();
-        });
-    </script>
-</body>
-</html>
+<!-- Materialize JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        M.AutoInit();
+    });
+</script>
+{% endblock %}
