@@ -13,42 +13,86 @@ from Crypto.Random import get_random_bytes
 from ecdsa import SigningKey, VerifyingKey, NIST384p
 import pqcryptography as pqc
 import base64
+import time 
+import psutil
+import csv
 
 # Initialize Flask application
 app = Flask(__name__)
 # app = Flask(__name__, static_folder='app/static')
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
-# AES Encryption
-def aes_encrypt(data, key):
+csv_file_path = 'measurements.csv'
+
+# Initialize the CSV file with headers
+def initialize_csv(file_path):
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Function", "Time (seconds)", "User CPU (seconds)", "System CPU (seconds)", "Memory (bytes)", "Patient Name (String)"])
+
+
+# Modified decorator to measure time and resources and write to the CSV file
+def measure_time_and_resources(func):
+    def wrapper(*args, **kwargs):
+        patient_name = kwargs.get('patient_name', 'Unknown')  # Default to 'Unknown' if not provided
+        start_time = time.time()
+        process = psutil.Process(os.getpid())
+        start_memory = process.memory_full_info().uss  # Use uss (Unique Set Size) for accurate memory usage
+        start_cpu_times = process.cpu_times()  # Start CPU times
+
+        result = func(*args, **kwargs)
+
+        end_cpu_times = process.cpu_times()  # End CPU times
+        end_memory = process.memory_full_info().uss  # Use uss for accurate memory usage
+        end_time = time.time()
+
+        time_taken = end_time - start_time
+        user_cpu_used = end_cpu_times.user - start_cpu_times.user
+        system_cpu_used = end_cpu_times.system - start_cpu_times.system
+        memory_used = end_memory - start_memory
+
+        with open(csv_file_path, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([func.__name__, time_taken, user_cpu_used, system_cpu_used, memory_used, patient_name])
+
+        return result
+    return wrapper
+
+@measure_time_and_resources
+def aes_encrypt(data, key, patient_name=None):
     cipher = AES.new(key, AES.MODE_EAX)
     ciphertext, tag = cipher.encrypt_and_digest(data)
     return base64.b64encode(cipher.nonce + tag + ciphertext).decode('utf-8')
 
 # AES Decryption
-def aes_decrypt(encrypted_data, key):
+@measure_time_and_resources
+def aes_decrypt(encrypted_data, key, patient_name=None):
     data = base64.b64decode(encrypted_data)
     nonce, tag, ciphertext = data[:16], data[16:32], data[32:]
     cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
     return cipher.decrypt_and_verify(ciphertext, tag).decode('utf-8')
 
 # PQC Encrypt (using default Kyber1024)
-def pqc_encrypt(public_key, data):
+@measure_time_and_resources
+def pqc_encrypt(public_key, data, patient_name=None):
     return pqc.encryption.encrypt(public_key, data.encode('utf-8'))
 
 # PQC Decrypt (using default Kyber1024)
-def pqc_decrypt(private_key, encrypted_data):
+@measure_time_and_resources
+def pqc_decrypt(private_key, encrypted_data, patient_name=None):
     return pqc.encryption.decrypt(private_key, encrypted_data).decode('utf-8')
 
 # ECC Sign
-def ecc_sign(data):
+@measure_time_and_resources
+def ecc_sign(data, patient_name=None):
     sk = SigningKey.generate(curve=NIST384p)
     vk = sk.verifying_key
     signature = sk.sign(data)
     return signature, vk
 
 # ECC Verify
-def ecc_verify(signature, data, vk):
+@measure_time_and_resources
+def ecc_verify(signature, data, vk, patient_name=None):
     return vk.verify(signature, data)
 
 # Home Route
@@ -67,16 +111,16 @@ def add_patient():
         aes_key = get_random_bytes(32)
 
         # Encrypt the patient data using AES
-        aes_encrypted_data = aes_encrypt(patient_data.encode('utf-8'), aes_key)
+        aes_encrypted_data = aes_encrypt(patient_data.encode('utf-8'), aes_key, patient_name=patient_name)
 
         # Generate PQC key pair (using default Kyber1024)
         public_key, private_key = pqc.encryption.generate_keypair()
 
         # Encrypt the AES key using PQC
-        pqc_encrypted_aes_key = pqc_encrypt(public_key, base64.b64encode(aes_key).decode('utf-8'))
+        pqc_encrypted_aes_key = pqc_encrypt(public_key, base64.b64encode(aes_key).decode('utf-8'), patient_name=patient_name)
 
         # Sign the AES encrypted data using ECC
-        ecc_signature, ecc_verifying_key = ecc_sign(aes_encrypted_data.encode('utf-8'))
+        ecc_signature, ecc_verifying_key = ecc_sign(aes_encrypted_data.encode('utf-8'), patient_name=patient_name)
 
         # Save patient data to the database
         save_patient_data_to_postgres(
@@ -117,7 +161,7 @@ def verify_patient():
 
         try:
             # Verify the signature using ECC
-            if ecc_verify(ecc_signature, aes_encrypted_data.encode('utf-8'), ecc_verifying_key):
+            if ecc_verify(ecc_signature, aes_encrypted_data.encode('utf-8'), ecc_verifying_key, patient_name=patient_name):
                 flash('Signature verified. You can now decrypt the data.')
                 return render_template('decrypt_patient.html', verified=True, patient_id=patient_id, patient_name=patient_name, aes_encrypted_data=aes_encrypted_data)
             else:
@@ -154,10 +198,10 @@ def decrypt_patient():
 
             try:
                 # Decrypt AES key using PQC
-                decrypted_aes_key = base64.b64decode(pqc_decrypt(pqc_private_key, pqc_encrypted_key))
+                decrypted_aes_key = base64.b64decode(pqc_decrypt(pqc_private_key, pqc_encrypted_key, patient_name=patient_name))
 
                 # Decrypt text using AES
-                decrypted_text = aes_decrypt(aes_encrypted_data, decrypted_aes_key)
+                decrypted_text = aes_decrypt(aes_encrypted_data, decrypted_aes_key, patient_name=patient_name)
 
                 # Flash a success message
                 flash('Patient data has been successfully decrypted!')
@@ -210,5 +254,6 @@ def delete_all():
 
 # Run the Flask application
 if __name__ == '__main__':
+    initialize_csv(csv_file_path)
     port = int(os.environ.get('PORT', 5600))
     app.run(debug=True, host='0.0.0.0', port=port)

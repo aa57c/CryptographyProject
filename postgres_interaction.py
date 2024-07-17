@@ -236,3 +236,4 @@ def delete_entry_by_id_or_name_from_postgres(entry_id=None, entry_name=None):
         conn.close()
     except Exception as e:
         print(f"Error deleting entries from PostgreSQL: {e}")
+
