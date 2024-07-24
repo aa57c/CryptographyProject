@@ -1,0 +1,51 @@
+{% extends "index.html" %}
+
+{% block title %}Home - Healthcare Cryptography Project{% endblock %}
+
+{% block content %}
+    <div class="col-md-12">
+        <h3>Healthcare Cryptography Demonstration</h3>
+        <p> Welcome in this short demonstration we will show how encrypted data gets saved 
+            in the database and how does decryption works!<br /> <br />
+            Use the menu below to navigate through the demonstration.
+
+        </p>
+        <!-- Display flashed messages -->
+         {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="card-panel teal lighten-2">
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <ul class="collection">
+            <li class="collection-item"><a href="{{ url_for('add_patient') }}">Add Patient Data</a></li>
+            <li class="collection-item"><a href="{{ url_for('decrypt_patient') }}">Retrieve and Decrypt Patient Data</a></li>
+            <li class="collection-item"><a href="{{ url_for('view_database') }}">View Database</a></li>
+            <li class="collection-item"><a href="{{ url_for('search_patient') }}">Search Patient by ID</a></li>
+        </ul>
+
+        <form id="deleteForm" method="post" action="{{ url_for('delete_all') }}">
+            <button class="btn red" type="button" onclick="confirmDeletion()">Delete All Entries</button>
+        </form>
+    </div>
+
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.AutoInit();
+        });
+
+        function confirmDeletion() {
+            if (confirm('Are you sure you want to delete all entries? This action cannot be undone.')) {
+                document.getElementById('deleteForm').submit();
+            }
+        }
+    </script>
+{% endblock %}

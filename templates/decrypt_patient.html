@@ -1,0 +1,74 @@
+{% extends "index.html" %}
+
+{% block title %}Home - Healthcare Cryptography Project{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <!-- Display flashed messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="card-panel teal lighten-2">
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <h1>Decrypt Patient Data</h1>
+
+        <p>When decrypting data we want to first verify that the user has permission to the data
+            for simplicity in this example we will auto verify our user. Click on Verify Signature
+             to be verified.</p>
+             
+        <form method="post" action="/verify_patient">
+            <div class="input-field">
+                <label for="patient_id">Patient ID (optional):</label>
+                <input type="text" id="patient_id" name="patient_id">
+            </div>
+            <button class="btn" type="submit">Verify Signature</button>
+        </form>
+
+        
+        {% if verified %}
+        <div class="mt-5 mb-5 container border">
+            <h6>The Signature has been verified for patient: </h6>
+            <p style="word-break: break-all"> {{ patient_name }} </p>
+            <h6> Encrypted data display below: </h6>
+            <p style="word-break: break-all"> {{ aes_encrypted_data }}</p>
+        </div>
+        
+
+        <form method="post" action="/decrypt_patient" class="mt-5">
+            <input type="hidden" name="patient_id" value="{{ patient_id }}">
+            <button class="btn" type="submit" name="decrypt">Decrypt</button>
+        </form>
+        {% endif %}
+        
+        {% if data %}
+        <div class="mt-5 mb-5">
+            <h5> The data collected and decripted is: </h5>
+            <div class="m-4 container border">
+                <h6>Patient Name: </h6>
+                <p style="word-break: break-all">{{ patient_name }}</p>
+                <h6>Patient Data: </h6>
+                <pstyle="word-break: break-all">{{ data }}</p>
+            </div>
+        </div>
+        {% endif %}
+       
+        <a href="{{ url_for('home') }}" class="btn red mt-5 mb-5">Back to Home</a>
+    </div>
+
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.AutoInit();
+        });
+    </script>
+
+{% endblock %}

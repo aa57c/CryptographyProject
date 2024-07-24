@@ -18,8 +18,8 @@ def table_exists(cur, table_name):
     """, (table_name,))
     return cur.fetchone()[0]
 
-# Function to create or update table and save a string to PostgreSQL
-def save_string_to_postgres(input_string):
+# Function to create or update table and save patient data to PostgreSQL
+def save_patient_data_to_postgres(patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key):
     try:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
@@ -34,18 +34,26 @@ def save_string_to_postgres(input_string):
         cur = conn.cursor()
 
         # Check if table exists
-        if not table_exists(cur, 'my_strings'):
+        if not table_exists(cur, 'patient_data'):
             # Create table if it doesn't exist
             cur.execute("""
-                CREATE TABLE my_strings (
+                CREATE TABLE patient_data (
                     id SERIAL PRIMARY KEY,
-                    content TEXT
+                    patient_name TEXT,
+                    aes_encrypted_data TEXT,
+                    pqc_encrypted_key TEXT,
+                    ecc_signature TEXT,
+                    ecc_verifying_key TEXT,
+                    pqc_private_key TEXT
                 )
             """)
-            print("Table 'my_strings' created successfully!")
+            print("Table 'patient_data' created successfully!")
 
-        # Insert or update the string into the table
-        cur.execute("INSERT INTO my_strings (content) VALUES (%s)", (input_string,))
+        # Insert the patient data into the table
+        cur.execute("""
+            INSERT INTO patient_data (patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key))
         
         # Commit the transaction
         conn.commit()
@@ -54,13 +62,13 @@ def save_string_to_postgres(input_string):
         cur.close()
         conn.close()
         
-        print("String saved successfully to PostgreSQL!")
+        print("Patient data saved successfully to PostgreSQL!")
 
     except Exception as e:
-        print(f"Error saving string to PostgreSQL: {e}")
+        print(f"Error saving patient data to PostgreSQL: {e}")
 
-# Function to retrieve the string from PostgreSQL
-def retrieve_string_from_postgres():
+# Function to retrieve the latest patient entry from PostgreSQL
+def retrieve_latest_patient_from_postgres():
     try:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
@@ -74,33 +82,158 @@ def retrieve_string_from_postgres():
         # Open a cursor to perform database operations
         cur = conn.cursor()
 
-        # Retrieve the string from the table
-        cur.execute("SELECT content FROM my_strings ORDER BY id DESC LIMIT 1")
-        retrieved_string = cur.fetchone()[0]
-
-        # Print retrieved string
-        print(f"Retrieved string from PostgreSQL: {retrieved_string}")
+        # Retrieve the latest patient entry from the table
+        cur.execute("""
+            SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+            FROM patient_data ORDER BY id DESC LIMIT 1
+        """)
+        result = cur.fetchone()
 
         # Close cursor and connection
         cur.close()
         conn.close()
 
-        return retrieved_string
+        return result
 
     except Exception as e:
-        print(f"Error retrieving string from PostgreSQL: {e}")
+        print(f"Error retrieving patient data from PostgreSQL: {e}")
         return None
 
-# Example usage
-if __name__ == "__main__":
-    input_string = "Hello, PostgreSQL!"
-    
-    # Save string to PostgreSQL
-    save_string_to_postgres(input_string)
+# Function to retrieve all patient entries from PostgreSQL
+def retrieve_all_patients_from_postgres():
+    try:
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+            FROM patient_data ORDER BY id
+        """)
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+        return results
+    except Exception as e:
+        print(f"Error retrieving all patient data from PostgreSQL: {e}")
+        return []
 
-    # Retrieve string from PostgreSQL
-    retrieved_string = retrieve_string_from_postgres()
+# Function to search for patient records in the database by ID
+def search_patient_by_id_in_postgres(search_id):
+    try:
+        # Connect to PostgreSQL database
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
 
-    # Display retrieved string
-    if retrieved_string:
-        print(f"Retrieved string: {retrieved_string}")
+        # Open a cursor to perform database operations
+        cur = conn.cursor()
+
+        # Perform the search query by ID
+        cur.execute("""
+            SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+            FROM patient_data WHERE id = %s
+        """, (search_id,))
+        result = cur.fetchone()
+
+        # Close cursor and connection
+        cur.close()
+        conn.close()
+
+        return result
+
+    except Exception as e:
+        print(f"Error searching patient data by ID in PostgreSQL: {e}")
+        return None
+
+# Function to delete all patient entries from PostgreSQL
+def delete_all_entries_from_postgres():
+    try:
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
+        cur = conn.cursor()
+        cur.execute("DELETE FROM patient_data")
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error deleting all patient entries from PostgreSQL: {e}")
+# Function to search for patient records in the database by ID or name
+def search_patient_by_id_or_name_in_postgres(patient_id=None, patient_name=None):
+    try:
+        # Connect to PostgreSQL database
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
+
+        # Open a cursor to perform database operations
+        cur = conn.cursor()
+
+        # Perform the search query by ID or name
+        if patient_id:
+            cur.execute("""
+                SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+                FROM patient_data WHERE id = %s
+            """, (patient_id,))
+        elif patient_name:
+            cur.execute("""
+                SELECT id, patient_name, aes_encrypted_data, pqc_encrypted_key, ecc_signature, ecc_verifying_key, pqc_private_key
+                FROM patient_data WHERE patient_name ILIKE %s
+            """, (f'%{patient_name}%',))
+        else:
+            return []
+
+        results = cur.fetchall()
+
+        # Close cursor and connection
+        cur.close()
+        conn.close()
+
+        return results
+
+    except Exception as e:
+        print(f"Error searching patient data by ID or name in PostgreSQL: {e}")
+        return []
+
+# Function to delete entries by ID or name from PostgreSQL
+def delete_entry_by_id_or_name_from_postgres(entry_id=None, entry_name=None):
+    try:
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
+        cur = conn.cursor()
+
+        if entry_id:
+            cur.execute("DELETE FROM patient_data WHERE id = %s", (entry_id,))
+        elif entry_name:
+            cur.execute("DELETE FROM patient_data WHERE patient_name ILIKE %s", (f'%{entry_name}%',))
+        else:
+            return
+
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error deleting entries from PostgreSQL: {e}")
+
