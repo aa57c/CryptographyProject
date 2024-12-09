@@ -2,7 +2,7 @@
 
 This project seeks to apply Cryptographic Algorithms to send a secure encrypted message and  successfully decrypt it. 
 
-The application is a Phyton application running on Flask inside of a docker container. For simplicity of the application we are using a posgreSQL database to store data.
+The application is a Python application running on Flask inside of a docker container. For simplicity of the application we are using a posgreSQL database to store data.
 
 ## Requirements
 -Docker Desktop or Docker in terminal
