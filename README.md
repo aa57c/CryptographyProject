@@ -1,70 +1,93 @@
-# About
+# 🔐 Cryptography Project
 
-This project seeks to apply Cryptographic Algorithms to send a secure encrypted message and  successfully decrypt it. 
+This is a secure web application built with Flask for encrypting and managing sensitive patient data. It allows healthcare providers or researchers to store encrypted records in a PostgreSQL database and decrypt them when needed. The application is Docker-ready for containerized deployment and includes a clean web interface.
 
-The application is a Python application running on Flask inside of a docker container. For simplicity of the application we are using a posgreSQL database to store data.
+---
 
-## Requirements
--Docker Desktop or Docker in terminal
+## 📦 Features
 
--Git Hub account set up
-## Installation
-Application is fully dockerized for installation. Follow these steps to get it running. After installing docker on your computer and setting up git hub. First clone the repo with the following command:
+- ✅ Encrypt patient data before saving it to the database
+- ✅ Decrypt data only when necessary using a secure key
+- ✅ PostgreSQL integration for persistent storage
+- ✅ Easy-to-use web interface built with HTML/CSS (Jinja2 templating)
+- ✅ Docker support for local or cloud deployment (e.g., AWS Elastic Beanstalk)
+
+---
+
+## 🛠️ Technologies Used
+
+- **Python** (Flask)
+- **Cryptography** library for encryption/decryption
+- **PostgreSQL** for database management
+- **Docker** and **Dockerrun.aws.json** for deployment
+- **HTML / CSS** for frontend
+
+---
+
+## 📁 Project Structure
+
+CryptographyProject-main/ ├── app.py # Main Flask app with route definitions ├── postgres_interaction.py # Database connection and SQL queries ├── requirements.txt # Python dependencies ├── Dockerfile # Docker image configuration ├── Dockerrun.aws.json # AWS deployment configuration ├── templates/ # HTML templates │ ├── add_patient.html # Page to input patient info │ ├── decrypt_patient.html # Page to decrypt patient data │ └── database.html # View encrypted records ├── static/ │ └── style.css # Web app styling └── README.md # Project documentation
+
+
+---
+
+## 🔧 Installation & Setup
+
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/JRossetto17/CryptographyProject.git
+git clone https://github.com/your-username/CryptographyProject.git
+cd CryptographyProject-main
 ```
-Note: we want to clone from dev branch to make updates
-
-
-After the clone is complete we will first build the docker image with:
+### 2. Create Virtual Environment
 ```bash
-docker image build -t 5533_project .
+python -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
 ```
-
-once the image is build we will use docker compose to run the application, use either one of the following command to run the app:
-
-- For Mac:
+### 3. Install Dependencies
 ```bash
-docker-compose up 
+pip install -r requirements.txt
 ```
-- For Windows:
+### 4. Configure PostgreSQL
+- Ensure PostgreSQL is installed and running.
+- Create a database and table matching your schema.
+- Update the connection string in postgres_interaction.py with your PostgreSQL credentials (host, dbname, user, password, port).
+### 5. Run the Flask Application
 ```bash
-docker compose up 
+python app.py
 ```
-All set the application should start running. Now you can visit local host + port to view the site: 
+Visit the app in your browser at:
+📍 http://127.0.0.1:5600/
+
+#### Docker Deployment
+To build and run the app using Docker:
+### 1. Build the image
 ```bash
-localhost:5600
+docker build -t cryptography-app .
 ```
-Tip - Some changes like config and Docker changes will require the app to rebuild, to do this you can use the following command for the app to rebuild and apply updates.
-- For Mac:
+### 2. Run the container
 ```bash
-docker-compose up —build
+docker run -p 5000:5000 cryptography-app
 ```
-- For Windows:
-```bash
-docker compose up —build
-```
+Then go to http://localhost:5600/ in your browser.
 
-## Usage
+#### AWS Deployment
 
-```python
-# import necessary dependencies or files
-from flask import Flask
+If you're deploying this app on AWS Elastic Beanstalk:
+- Zip the project files.
+- Use the provided Dockerrun.aws.json to define your Docker container settings.
+- Upload the zipped bundle to AWS Elastic Beanstalk (using Single Container Docker environment).
 
-#Defines routes
-@app.route('/')
-   #renders templates routes depending on route
-   return render_template("template_name.html")
+Make sure your PostgreSQL instance is accessible to the application (RDS or similar).
 
-#Initializeds Flask
-if __name__ == '__main__':
-    app.run(debug=True)
-```
+#### Encryption Notes
+- The app uses the cryptography.fernet module for symmetric encryption.
+- The key used for encryption should be securely managed (e.g., via environment variables or AWS Secrets Manager).
+- Never hard-code secret keys in the source code for production use.
 
-## Contributing
+#### Author
+Developed by: Ashna Ali
+Collaborated with: JRossetto17 (His github to the local environment setup is found here: https://github.com/JRossetto17/CryptographyProject)
 
-Contributing is limited to team members. Request to be added to the team to propose changes. Comments and Feedback are welcome!
-
-Please make sure to update tests as appropriate.
-
+#### Deployment
+I have deployed this application to Elastic Beanstalk here: http://crypt-app-2-dev.us-east-1.elasticbeanstalk.com/
