@@ -38,5 +38,5 @@ COPY . .
 # Expose port 5600
 EXPOSE 5600
 
-# Run app.py using Python
-CMD ["python", "app.py"]
+# Run app.py using gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5600", "app:app"]
