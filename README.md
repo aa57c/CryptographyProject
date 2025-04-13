@@ -67,7 +67,7 @@ docker build -t cryptography-app .
 ```
 ### 2. Run the container
 ```bash
-docker run -p 5000:5000 cryptography-app
+docker run -p 5600:5600 cryptography-app
 ```
 Then go to http://localhost:5600/ in your browser.
 
