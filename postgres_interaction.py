@@ -1,11 +1,5 @@
 import psycopg2
-
-# Database connection parameters
-dbname = "mydatabase"
-user = "postgres"
-password = "password"
-host = "db"
-port = "5432"
+import os
 
 # Function to check if table exists
 def table_exists(cur, table_name):
@@ -23,11 +17,11 @@ def save_patient_data_to_postgres(patient_name, aes_encrypted_data, pqc_encrypte
     try:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            port=os.getenv("DB_PORT", 5432)
         )
 
         # Open a cursor to perform database operations
@@ -72,11 +66,11 @@ def retrieve_latest_patient_from_postgres():
     try:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            port=os.getenv("DB_PORT", 5432)
         )
 
         # Open a cursor to perform database operations
@@ -103,11 +97,11 @@ def retrieve_latest_patient_from_postgres():
 def retrieve_all_patients_from_postgres():
     try:
         conn = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            port=os.getenv("DB_PORT", 5432)
         )
         cur = conn.cursor()
         cur.execute("""
@@ -127,11 +121,11 @@ def search_patient_by_id_in_postgres(search_id):
     try:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            port=os.getenv("DB_PORT", 5432)
         )
 
         # Open a cursor to perform database operations
@@ -158,11 +152,11 @@ def search_patient_by_id_in_postgres(search_id):
 def delete_all_entries_from_postgres():
     try:
         conn = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            port=os.getenv("DB_PORT", 5432)
         )
         cur = conn.cursor()
         cur.execute("DELETE FROM patient_data")
@@ -176,11 +170,11 @@ def search_patient_by_id_or_name_in_postgres(patient_id=None, patient_name=None)
     try:
         # Connect to PostgreSQL database
         conn = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            port=os.getenv("DB_PORT", 5432)
         )
 
         # Open a cursor to perform database operations
@@ -216,11 +210,11 @@ def search_patient_by_id_or_name_in_postgres(patient_id=None, patient_name=None)
 def delete_entry_by_id_or_name_from_postgres(entry_id=None, entry_name=None):
     try:
         conn = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            port=os.getenv("DB_PORT", 5432)
         )
         cur = conn.cursor()
 

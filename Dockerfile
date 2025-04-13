@@ -1,4 +1,3 @@
-
 # Use an official Python runtime as a parent image
 FROM python:3.10-slim
 
@@ -30,14 +29,14 @@ RUN ldconfig
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the working directory contents into the container at /app
+# Copy the rest of the working directory contents into the container
 COPY . .
 
-# Make port 5600 available to the world outside this container
+# Expose port 5600
 EXPOSE 5600
 
-# Run app.py when the container launches
-CMD ["app.py"]
+# Run app.py using Python
+CMD ["python", "app.py"]
