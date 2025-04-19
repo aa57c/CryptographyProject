@@ -2,6 +2,8 @@
 
 This is a secure web application built with Flask for encrypting and managing sensitive patient data. It allows healthcare providers or researchers to store encrypted records in a PostgreSQL database and decrypt them when needed. The application is Docker-ready for containerized deployment and includes a clean web interface.
 
+Deployment is at this domain using Elastic Beanstalk: http://crypt-app-2-dev.us-east-1.elasticbeanstalk.com/
+
 ---
 
 ## 📦 Features
@@ -88,6 +90,3 @@ Make sure your PostgreSQL instance is accessible to the application (RDS or simi
 #### Author
 Developed by: Ashna Ali
 Collaborated with: JRossetto17 (His github to the local environment setup is found here: https://github.com/JRossetto17/CryptographyProject)
-
-#### Deployment
-I have deployed this application to Elastic Beanstalk here: http://crypt-app-2-dev.us-east-1.elasticbeanstalk.com/
